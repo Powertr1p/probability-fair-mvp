@@ -1,0 +1,774 @@
+#pragma version =0.4.6;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+;; Guess_Guess.headers.fc
+;;
+;; Header files for Guess
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_store_address_opt
+builder __tact_store_address_opt(builder b, slice address) inline;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; __tact_context_get_sender
+slice __tact_context_get_sender() inline;
+
+;; __tact_slice_eq_bits_nullable_right
+int __tact_slice_eq_bits_nullable_right(slice a, slice b) inline;
+
+;; $DeployOk$_store
+builder $DeployOk$_store(builder build_0, (int) v) inline;
+
+;; $DeployOk$_store_cell
+cell $DeployOk$_store_cell((int) v, builder b) inline;
+
+;; $DepositEvent$_store
+builder $DepositEvent$_store(builder build_0, (slice, int, int) v) inline;
+
+;; $DepositEvent$_store_cell
+cell $DepositEvent$_store_cell((slice, int, int) v, builder b) inline;
+
+;; $WithdrawEvent$_store
+builder $WithdrawEvent$_store(builder build_0, (slice, int, int) v) inline;
+
+;; $WithdrawEvent$_store_cell
+cell $WithdrawEvent$_store_cell((slice, int, int) v, builder b) inline;
+
+;; $Guess$_store
+builder $Guess$_store(builder build_0, (slice, int, int) v) inline;
+
+;; $Guess$_load
+(slice, ((slice, int, int))) $Guess$_load(slice sc_0) inline;
+
+;; $Context$_get_value
+_ $Context$_get_value((int, slice, int, slice) v) inline;
+
+;; $Guess$_contract_init
+(slice, int, int) $Guess$_contract_init() impure inline;
+
+;; $Guess$_contract_load
+(slice, int, int) $Guess$_contract_load() impure inline;
+
+;; $Guess$_contract_store
+() $Guess$_contract_store((slice, int, int) v) impure inline;
+
+;; $global_emit
+() $global_emit(cell $body) impure inline;
+
+;; $global_createCellFromUint256
+cell $global_createCellFromUint256(int $value) impure inline;
+
+;; $global_hashSlice
+int $global_hashSlice(slice $slice) impure inline;
+
+;; $Cell$_fun_asSlice
+slice $Cell$_fun_asSlice(cell $self) impure inline;
+
+;; $global_pfHash
+int $global_pfHash(int $seed, int $roomSeed, int $nonce) impure inline_ref;
+
+;; $Guess$_fun_get_owner
+((slice, int, int), slice) $Guess$_fun_get_owner((slice, int, int) $self) impure inline_ref;
+
+;; $Guess$_fun_get_anchor
+((slice, int, int), int) $Guess$_fun_get_anchor((slice, int, int) $self) impure inline_ref;
+
+;; $Guess$_fun_get_total_deposits
+((slice, int, int), int) $Guess$_fun_get_total_deposits((slice, int, int) $self) impure inline_ref;
+
+;; $Guess$_fun_verifyRound
+((slice, int, int), int) $Guess$_fun_verifyRound((slice, int, int) $self, int $serverSeed, int $roomSeed, int $nonce, int $claimedResult) impure inline_ref;
+
+;; $Guess$_fun_verifyRoundSlice
+((slice, int, int), int) $Guess$_fun_verifyRoundSlice((slice, int, int) $self, slice $serverSeedSlice, slice $roomSeedSlice, int $nonce, int $claimedResult) impure inline_ref;
+
+;; $Guess$_fun_calculateResult
+((slice, int, int), int) $Guess$_fun_calculateResult((slice, int, int) $self, int $serverSeed, int $roomSeed, int $nonce) impure inline_ref;
+
+;; $Guess$_fun_verifyChainLink
+((slice, int, int), int) $Guess$_fun_verifyChainLink((slice, int, int) $self, slice $seedNextSlice, slice $seedCurrentSlice) impure inline_ref;
+
+;; $MessageParameters$_constructor_bounce_to_value_mode_body
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
+
+;; $Guess$_fun_notify
+((slice, int, int), ()) $Guess$_fun_notify((slice, int, int) $self, cell $body) impure inline;
+
+;; $DepositEvent$_constructor_player_amount_timestamp
+((slice, int, int)) $DepositEvent$_constructor_player_amount_timestamp(slice $player, int $amount, int $timestamp) inline;
+
+;; $WithdrawEvent$_constructor_player_amount_timestamp
+((slice, int, int)) $WithdrawEvent$_constructor_player_amount_timestamp(slice $player, int $amount, int $timestamp) inline;
+
+;; $SendParameters$_constructor_to_value_mode
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline;
+
+;; $DeployOk$_constructor_queryId
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
+
+
+;; Guess_Guess.stdlib.fc
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_child_contract_codes;
+global int __tact_randomized;
+
+int __tact_sha256(slice data) asm """
+
+            <{
+                <{ DUP SREFS }> PUSHCONT
+                <{ LDREFRTOS }> PUSHCONT
+                WHILE
+                DEPTH
+                HASHEXT_SHA256
+            }> PUSHCONT
+            1 1 CALLXARGS
+
+""";
+
+(slice, slice) __tact_load_address_opt(slice cs) asm """
+
+            b{00} SDBEGINSQ
+            IF:<{
+              PUSHNULL
+            }>ELSE<{
+              LDMSGADDR
+              SWAP
+            }>
+
+""";
+
+builder __tact_store_addr_none(builder b) asm "b{00} STSLICECONST";
+
+builder __tact_store_address_opt(builder b, slice address) inline {
+    if (null?(address)) {
+        return __tact_store_addr_none(b);
+    } else {
+        return b.store_slice(address);
+    }
+}
+
+(int, slice, int, slice) __tact_context_get() inline {
+    return __tact_context;
+}
+
+slice __tact_context_get_sender() inline {
+    return __tact_context_sender;
+}
+
+int __tact_slice_eq_bits_nullable_right(slice a, slice b) inline {
+    return (null?(b)) ? (false) : (equal_slices_bits(a, b));
+}
+
+builder $global_beginCell() impure asm """
+    NEWC
+""";
+
+int $global_myBalance() impure asm """
+    BALANCE FIRST
+""";
+
+() $global_nativeReserve(int $amount, int $mode) impure asm """
+    RAWRESERVE
+""";
+
+() $global_message((int, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+    STZEROES
+    // → Stack state
+    // s0: Builder
+    // s1: `body`
+    // s2: `mode`
+    STDICT
+    ENDC
+    SWAP
+    SENDRAWMSG
+""";
+
+() $global_send((int, cell, cell, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+    STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+    // → Stack state
+    // s0: Builder
+    // s1: `data`
+    // s2: `code`
+    // s3: `body`
+    // s4: `mode`
+
+    // Group 2: Placing the Builder after code and data, then checking those for nullability
+    s2 XCHG0
+    DUP2
+    ISNULL
+    SWAP
+    ISNULL
+    AND
+    // → Stack state
+    // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+    // s1: `code`
+    // s2: `data`
+    // s3: Builder
+    // s4: `body`
+    // s5: `mode`
+
+    // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+    <{
+        DROP2 // drop `data` and `code`, since either of those is null
+        b{0} STSLICECONST
+    }> PUSHCONT
+
+    // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+    <{
+        // _ split_depth:(Maybe (## 5))
+        //   special:(Maybe TickTock)
+        //   code:(Maybe ^Cell)
+        //   data:(Maybe ^Cell)
+        //   library:(Maybe ^Cell)
+        // = StateInit;
+        ROT                // place message Builder on top
+        b{10} STSLICECONST // store Maybe = true, Either = false
+        // Start composing inlined StateInit
+        b{00} STSLICECONST // store split_depth and special first
+        STDICT             // store code
+        STDICT             // store data
+        b{0} STSLICECONST  // store library
+    }> PUSHCONT
+
+    // Group 3: IFELSE that does the branching shown above
+    IFELSE
+    // → Stack state
+    // s0: Builder
+    // s1: null or StateInit
+    // s2: `body`
+    // s3: `mode`
+
+    // Group 4: Finalizing the message
+    STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
+    ENDC
+    // → Stack state
+    // s0: Cell
+    // s1: `mode`
+
+    // Group 5: Sending the message, with `mode` on top
+    SWAP
+    SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+""";
+
+() $global_sendRawMessage(cell $msg, int $mode) impure asm """
+    SENDRAWMSG
+""";
+
+cell $Builder$_fun_endCell(builder $self) impure asm """
+    ENDC
+""";
+
+builder $Builder$_fun_storeRef(cell $cell, builder $self) impure asm """
+    STREF
+""";
+
+() $global_emit(cell $body) impure inline {
+    cell $c = $Builder$_fun_endCell($Builder$_fun_storeRef($body, store_uint($global_beginCell(), 15211807202738752817960438464513, 104)));
+    $global_sendRawMessage($c, 0);
+}
+
+int $global_now() impure asm """
+    NOW
+""";
+
+slice $Cell$_fun_beginParse(cell $self) impure asm """
+    CTOS
+""";
+
+slice $Cell$_fun_asSlice(cell $self) impure inline {
+    var ($self) = $self;
+    return $Cell$_fun_beginParse($self);
+}
+
+((slice, int, int), ()) $Guess$_fun_notify((slice, int, int) $self, cell $body) impure inline {
+    var (($self'owner, $self'anchor, $self'totalDeposits)) = $self;
+    slice $to = __tact_context_get_sender();
+    int $bounce = false;
+    if (false) {
+        int $balance = $global_myBalance();
+        int $balanceBeforeMessage = ($balance - $Context$_get_value(__tact_context_get()));
+        if (($balanceBeforeMessage < 0)) {
+            $global_nativeReserve(0, 0);
+            $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
+            return (($self'owner, $self'anchor, $self'totalDeposits), ());
+        }
+    }
+    $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
+    return (($self'owner, $self'anchor, $self'totalDeposits), ());
+}
+
+;; Guess_Guess.storage.fc
+;;
+;; Type: Context
+;; TLB: _ bounceable:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounceable, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell value:int257 to:address bounce:bool = SendParameters
+;;
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline {
+    return ($mode, null(), null(), null(), $value, $to, true);
+}
+
+;;
+;; Type: MessageParameters
+;; TLB: _ mode:int257 body:Maybe ^cell value:int257 to:address bounce:bool = MessageParameters
+;;
+
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, $value, $to, $bounce);
+}
+
+;;
+;; Type: DeployOk
+;; Header: 0xaff90f57
+;; TLB: deploy_ok#aff90f57 queryId:uint64 = DeployOk
+;;
+
+builder $DeployOk$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $DeployOk$_store_cell((int) v, builder b) inline {
+    return $DeployOk$_store(b, v).end_cell();
+}
+
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline {
+    return ($queryId);
+}
+
+;;
+;; Type: DepositEvent
+;; Header: 0x7362d09c
+;; TLB: deposit_event#7362d09c player:address amount:coins timestamp:uint32 = DepositEvent
+;;
+
+builder $DepositEvent$_store(builder build_0, (slice, int, int) v) inline {
+    var (v'player, v'amount, v'timestamp) = v;
+    build_0 = store_uint(build_0, 1935855772, 32);
+    build_0 = build_0.store_slice(v'player);
+    build_0 = build_0.store_varuint16(v'amount);
+    build_0 = build_0.store_uint(v'timestamp, 32);
+    return build_0;
+}
+
+cell $DepositEvent$_store_cell((slice, int, int) v, builder b) inline {
+    return $DepositEvent$_store(b, v).end_cell();
+}
+
+((slice, int, int)) $DepositEvent$_constructor_player_amount_timestamp(slice $player, int $amount, int $timestamp) inline {
+    return ($player, $amount, $timestamp);
+}
+
+;;
+;; Type: WithdrawEvent
+;; Header: 0x85007c9f
+;; TLB: withdraw_event#85007c9f player:address amount:coins timestamp:uint32 = WithdrawEvent
+;;
+
+builder $WithdrawEvent$_store(builder build_0, (slice, int, int) v) inline {
+    var (v'player, v'amount, v'timestamp) = v;
+    build_0 = store_uint(build_0, 2231401631, 32);
+    build_0 = build_0.store_slice(v'player);
+    build_0 = build_0.store_varuint16(v'amount);
+    build_0 = build_0.store_uint(v'timestamp, 32);
+    return build_0;
+}
+
+cell $WithdrawEvent$_store_cell((slice, int, int) v, builder b) inline {
+    return $WithdrawEvent$_store(b, v).end_cell();
+}
+
+((slice, int, int)) $WithdrawEvent$_constructor_player_amount_timestamp(slice $player, int $amount, int $timestamp) inline {
+    return ($player, $amount, $timestamp);
+}
+
+;;
+;; Type: Guess
+;; TLB: _ owner:address anchor:uint256 totalDeposits:coins = Guess
+;;
+
+builder $Guess$_store(builder build_0, (slice, int, int) v) inline {
+    var (v'owner, v'anchor, v'totalDeposits) = v;
+    build_0 = __tact_store_address_opt(build_0, v'owner);
+    build_0 = build_0.store_uint(v'anchor, 256);
+    build_0 = build_0.store_varuint16(v'totalDeposits);
+    return build_0;
+}
+
+(slice, ((slice, int, int))) $Guess$_load(slice sc_0) inline {
+    var v'owner = sc_0~__tact_load_address_opt();
+    var v'anchor = sc_0~load_uint(256);
+    var v'totalDeposits = sc_0~load_varuint16();
+    return (sc_0, (v'owner, v'anchor, v'totalDeposits));
+}
+
+(slice, int, int) $Guess$_contract_load() impure inline {
+    slice $sc = get_data().begin_parse();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$Guess$_load();
+    }
+    else {
+        return $Guess$_contract_init();
+    }
+}
+
+() $Guess$_contract_store((slice, int, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_int(true, 1);
+    b = $Guess$_store(b, v);
+    set_data(b.end_cell());
+}
+
+;;
+;; Contract Guess functions
+;;
+
+(slice, int, int) $Guess$_contract_init() impure inline {
+    var (($self'owner, $self'anchor, $self'totalDeposits)) = (null(), 0, 0);
+    $self'owner = __tact_context_get_sender();
+    $self'anchor = 0;
+    $self'totalDeposits = 0;
+    return ($self'owner, $self'anchor, $self'totalDeposits);
+}
+
+cell $global_createCellFromUint256(int $value) impure inline {
+    return $Builder$_fun_endCell(store_uint($global_beginCell(), $value, 256));
+}
+
+int $global_hashSlice(slice $slice) impure inline {
+    return __tact_sha256($slice);
+}
+
+int $global_pfHash(int $seed, int $roomSeed, int $nonce) impure inline_ref {
+    int $hash1 = __tact_sha256($Cell$_fun_asSlice($Builder$_fun_endCell(store_uint($global_beginCell(), $seed, 256))));
+    int $hash2 = __tact_sha256($Cell$_fun_asSlice($Builder$_fun_endCell(store_uint($global_beginCell(), $roomSeed, 256))));
+    int $hash3 = __tact_sha256($Cell$_fun_asSlice($Builder$_fun_endCell(store_uint($global_beginCell(), $nonce, 64))));
+    cell $combined = $Builder$_fun_endCell(store_uint(store_uint(store_uint($global_beginCell(), $hash1, 256), $hash2, 256), $hash3, 256));
+    return __tact_sha256($Cell$_fun_asSlice($combined));
+}
+
+((slice, int, int), slice) $Guess$_fun_get_owner((slice, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'anchor, $self'totalDeposits)) = $self;
+    var $fresh$ret_0 = $self'owner;
+    return (($self'owner, $self'anchor, $self'totalDeposits), $fresh$ret_0);
+}
+
+((slice, int, int), int) $Guess$_fun_get_anchor((slice, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'anchor, $self'totalDeposits)) = $self;
+    var $fresh$ret_1 = $self'anchor;
+    return (($self'owner, $self'anchor, $self'totalDeposits), $fresh$ret_1);
+}
+
+((slice, int, int), int) $Guess$_fun_get_total_deposits((slice, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'anchor, $self'totalDeposits)) = $self;
+    var $fresh$ret_2 = $self'totalDeposits;
+    return (($self'owner, $self'anchor, $self'totalDeposits), $fresh$ret_2);
+}
+
+((slice, int, int), int) $Guess$_fun_verifyRound((slice, int, int) $self, int $serverSeed, int $roomSeed, int $nonce, int $claimedResult) impure inline_ref {
+    var (($self'owner, $self'anchor, $self'totalDeposits)) = $self;
+    int $hash = $global_pfHash($serverSeed, $roomSeed, $nonce);
+    int $expectedResult = (($hash % 5) + 1);
+    if (($expectedResult == $claimedResult)) {
+        var $fresh$ret_3 = 1;
+        return (($self'owner, $self'anchor, $self'totalDeposits), $fresh$ret_3);
+    } else {
+        var $fresh$ret_4 = 0;
+        return (($self'owner, $self'anchor, $self'totalDeposits), $fresh$ret_4);
+    }
+}
+
+((slice, int, int), int) $Guess$_fun_verifyRoundSlice((slice, int, int) $self, slice $serverSeedSlice, slice $roomSeedSlice, int $nonce, int $claimedResult) impure inline_ref {
+    var (($self'owner, $self'anchor, $self'totalDeposits)) = $self;
+    int $hash1 = __tact_sha256($serverSeedSlice);
+    int $hash2 = __tact_sha256($roomSeedSlice);
+    int $hash3 = __tact_sha256($Cell$_fun_asSlice($Builder$_fun_endCell(store_uint($global_beginCell(), $nonce, 64))));
+    cell $combined = $Builder$_fun_endCell(store_uint(store_uint(store_uint($global_beginCell(), $hash1, 256), $hash2, 256), $hash3, 256));
+    int $finalHash = __tact_sha256($Cell$_fun_asSlice($combined));
+    int $result = (($finalHash % 5) + 1);
+    var $fresh$ret_5 = (($result == $claimedResult) ? 1 : 0);
+    return (($self'owner, $self'anchor, $self'totalDeposits), $fresh$ret_5);
+}
+
+((slice, int, int), int) $Guess$_fun_calculateResult((slice, int, int) $self, int $serverSeed, int $roomSeed, int $nonce) impure inline_ref {
+    var (($self'owner, $self'anchor, $self'totalDeposits)) = $self;
+    int $hash = $global_pfHash($serverSeed, $roomSeed, $nonce);
+    int $result = (($hash % 5) + 1);
+    var $fresh$ret_6 = $result;
+    return (($self'owner, $self'anchor, $self'totalDeposits), $fresh$ret_6);
+}
+
+((slice, int, int), int) $Guess$_fun_verifyChainLink((slice, int, int) $self, slice $seedNextSlice, slice $seedCurrentSlice) impure inline_ref {
+    var (($self'owner, $self'anchor, $self'totalDeposits)) = $self;
+    int $hashOfNext = $global_hashSlice($seedNextSlice);
+    int $hashOfCurrent = $global_hashSlice($seedCurrentSlice);
+    cell $expectedCurrentCell = $global_createCellFromUint256($hashOfNext);
+    int $expectedCurrentHash = $global_hashSlice($Cell$_fun_asSlice($expectedCurrentCell));
+    var $fresh$ret_7 = (($expectedCurrentHash == $hashOfCurrent) ? 1 : 0);
+    return (($self'owner, $self'anchor, $self'totalDeposits), $fresh$ret_7);
+}
+
+;;
+;; Get methods of a Contract Guess
+;;
+
+_ %get_owner() method_id(80293) {
+    var self = $Guess$_contract_load();
+    var res = self~$Guess$_fun_get_owner();
+    return res;
+}
+
+_ %get_anchor() method_id(98002) {
+    var self = $Guess$_contract_load();
+    var res = self~$Guess$_fun_get_anchor();
+    return res;
+}
+
+_ %get_total_deposits() method_id(73975) {
+    var self = $Guess$_contract_load();
+    var res = self~$Guess$_fun_get_total_deposits();
+    return res;
+}
+
+_ %verifyRound(int $serverSeed, int $roomSeed, int $nonce, int $claimedResult) method_id(101951) {
+    int $serverSeed = $serverSeed;
+    int $roomSeed = $roomSeed;
+    int $nonce = $nonce;
+    int $claimedResult = $claimedResult;
+    var self = $Guess$_contract_load();
+    var res = self~$Guess$_fun_verifyRound($serverSeed, $roomSeed, $nonce, $claimedResult);
+    return res;
+}
+
+_ %verifyRoundSlice(slice $serverSeedSlice, slice $roomSeedSlice, int $nonce, int $claimedResult) method_id(106495) {
+    slice $serverSeedSlice = $serverSeedSlice;
+    slice $roomSeedSlice = $roomSeedSlice;
+    int $nonce = $nonce;
+    int $claimedResult = $claimedResult;
+    var self = $Guess$_contract_load();
+    var res = self~$Guess$_fun_verifyRoundSlice($serverSeedSlice, $roomSeedSlice, $nonce, $claimedResult);
+    return res;
+}
+
+_ %calculateResult(int $serverSeed, int $roomSeed, int $nonce) method_id(128364) {
+    int $serverSeed = $serverSeed;
+    int $roomSeed = $roomSeed;
+    int $nonce = $nonce;
+    var self = $Guess$_contract_load();
+    var res = self~$Guess$_fun_calculateResult($serverSeed, $roomSeed, $nonce);
+    return res;
+}
+
+_ %verifyChainLink(slice $seedNextSlice, slice $seedCurrentSlice) method_id(82141) {
+    slice $seedNextSlice = $seedNextSlice;
+    slice $seedCurrentSlice = $seedCurrentSlice;
+    var self = $Guess$_contract_load();
+    var res = self~$Guess$_fun_verifyChainLink($seedNextSlice, $seedCurrentSlice);
+    return res;
+}
+
+;;
+;; Routing of a Contract Guess
+;;
+
+;; message opcode reader utility: only binary receivers
+;; Returns 32 bit message opcode, otherwise throws the "Invalid incoming message" exit code
+(slice, int) ~load_opcode_internal(slice s) asm( -> 1 0) "32 LDUQ 130 THROWIFNOT";
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    cs~skip_bits(2);
+    var msg_bounceable = cs~load_int(1);
+    var msg_bounced = cs~load_int(1);
+    slice msg_sender_addr = cs~load_msg_addr();
+    __tact_context = (msg_bounceable, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var ($self'owner, $self'anchor, $self'totalDeposits) = $Guess$_contract_load();
+    
+    ;; Handle bounced messages
+    if (msg_bounced) { return (); }
+    int op = 0;
+    int in_msg_length = slice_bits(in_msg);
+    if (in_msg_length >= 32) {
+        op = in_msg~load_uint(32);
+    }
+    ;; Receive SetOwner message
+    if (op == 2) {
+        var $msg'queryId = in_msg~load_uint(64);
+        var $msg'owner = in_msg~load_msg_addr();
+        throw_unless(49729, ( __tact_slice_eq_bits_nullable_right(__tact_context_get_sender(), $self'owner) ));
+        $self'owner = $msg'owner;
+        $Guess$_contract_store(($self'owner, $self'anchor, $self'totalDeposits));
+        return ();
+    }
+    
+    ;; Receive NewSession message
+    if (op == 1) {
+        var $msg'queryId = in_msg~load_uint(64);
+        var $msg'newAnchor = in_msg~load_uint(256);
+        throw_unless(39000, ( ((~ null?($self'owner))) ? (( __tact_slice_eq_bits_nullable_right(__tact_context_get_sender(), $self'owner) )) : (false) ));
+        $self'anchor = $msg'newAnchor;
+        $Guess$_contract_store(($self'owner, $self'anchor, $self'totalDeposits));
+        return ();
+    }
+    
+    ;; Receive Deposit message
+    if (op == 4) {
+        var $msg'queryId = in_msg~load_uint(64);
+        var $msg'amount = in_msg~load_varuint16();
+        $self'totalDeposits = $self'totalDeposits + $msg'amount;
+        $global_emit($DepositEvent$_store_cell($DepositEvent$_constructor_player_amount_timestamp(__tact_context_get_sender(), $msg'amount, $global_now()), begin_cell()));
+        $Guess$_contract_store(($self'owner, $self'anchor, $self'totalDeposits));
+        return ();
+    }
+    
+    ;; Receive Withdraw message
+    if (op == 3) {
+        var $msg'queryId = in_msg~load_uint(64);
+        var $msg'amount = in_msg~load_varuint16();
+        var $msg'address = in_msg~load_msg_addr();
+        throw_unless(31257, ( __tact_slice_eq_bits_nullable_right(__tact_context_get_sender(), $self'owner) ));
+        throw_unless(46182, ($self'totalDeposits >= $msg'amount));
+        $self'totalDeposits = $self'totalDeposits - $msg'amount;
+        $global_emit($WithdrawEvent$_store_cell($WithdrawEvent$_constructor_player_amount_timestamp($msg'address, $msg'amount, $global_now()), begin_cell()));
+        $global_send($SendParameters$_constructor_to_value_mode($msg'address, $msg'amount, 1));
+        $Guess$_contract_store(($self'owner, $self'anchor, $self'totalDeposits));
+        return ();
+    }
+    
+    ;; Receive Deploy message
+    if (op == 0x946a98b6) {
+        var $deploy'queryId = in_msg~load_uint(64);
+        ($self'owner, $self'anchor, $self'totalDeposits)~$Guess$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
+        $Guess$_contract_store(($self'owner, $self'anchor, $self'totalDeposits));
+        return ();
+    }
+    
+    ;; Receive empty message
+    if ((op == 0) & (in_msg_length <= 32)) {
+        $Guess$_contract_store(($self'owner, $self'anchor, $self'totalDeposits));
+        return ();
+    }
+    ;; Throw if not handled
+    throw(130);
+}
+
+
+() __tact_selector_hack_asm() impure asm """
+@atend @ 1 {
+        execute current@ context@ current!
+        {
+            // The core idea of this function is to save gas by avoiding unnecessary dict jump, when recv_internal/recv_external is called
+            // We want to extract recv_internal/recv_external from the dict and select needed function
+            // not by jumping to the needed function by it's index, but by using usual IF statements.
+
+            }END> b> // Close previous builder, now we have a cell of previous code on top of the stack
+
+            <{ // Start of the new code builder
+                SETCP0
+                // Swap the new code builder with the previous code, now we have previous code on top of the stack
+                swap
+                // Transform cell to slice and load first ref from the previous code, now we have the dict on top of the stack
+                <s ref@
+
+                // Extract the recv_internal from the dict
+                dup 0 swap @procdictkeylen idict@ { "internal shortcut error" abort } ifnot
+                swap
+
+                // Delete the recv_internal from the dict
+                0 swap @procdictkeylen idict- drop
+                // Delete the recv_external from the dict (it's okay if it's not there)
+                -1 swap @procdictkeylen idict- drop
+                // Delete the __tact_selector_hack from the dict
+                65535 swap @procdictkeylen idict- drop
+
+                // Bring the code builder from the bottom of the stack
+                // because if recv_external extraction is optional, and the number of elements on the stack is not fixed
+                depth 1- roll
+                // Swap with the dict from which we extracted recv_internal and (maybe) recv_external
+                swap
+
+                // Check if the dict is empty
+                dup null?
+                // Store a copy of this flag in the bottom of the stack
+                dup depth 1- -roll
+                {
+                    // If the dict is empty, just drop it (it will be null if it's empty)
+                    drop
+                }
+                {
+                    // If the dict is not empty, prepare continuation to be stored in c3
+                    <{
+                        // Save this dict as first ref in this continuation, it will be pushed in runtime by DICTPUSHCONST
+                        swap @procdictkeylen DICTPUSHCONST
+                        // Jump to the needed function by it's index
+                        DICTIGETJMPZ
+                        // If such key is not found, throw 11 along with the key as an argument
+                        11 THROWARG
+                    }> PUSHCONT
+                    // Store the continuation in c3
+                    c3 POP
+                } cond
+
+                // Function id is on top of the (runtime) stack
+                DUP IFNOTJMP:<{
+                    // place recv_internal here
+                    DROP swap @addop
+                }>
+
+                // Bring back the flag, indicating if the dict is empty or not from the bottom of the stack
+                depth 1- roll
+                {
+                    // If the dict is empty, throw 11
+                    11 THROWARG
+                }
+                {
+                    // If the dict is not empty, jump to continuation from c3
+                    c3 PUSH JMPX
+                } cond
+            }> b>
+        } : }END>c
+        current@ context! current!
+    } does @atend !
+""";
+
+() __tact_selector_hack() method_id(65535) {
+    return __tact_selector_hack_asm();
+}

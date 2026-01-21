@@ -41,8 +41,13 @@ export async function waitForSeqnoUpdate(
         console.log(`Ожидание обновления seqno, попытка ${attempts}/${maxAttempts}...`);
     }
     
-    console.log(`Предупреждение: seqno не обновился за ${maxAttempts} попыток, используем текущий: ${currentSeqno}`);
-    return currentSeqno;
+    const finalSeqno = await walletContract.getSeqno();
+    if (finalSeqno >= minSeqno) {
+        console.log(`Seqno обновлен на последней проверке: ${currentSeqno} → ${finalSeqno}`);
+        return finalSeqno;
+    }
+    
+    throw new Error(`Seqno не обновился за ${maxAttempts} попыток. Ожидали >= ${minSeqno}, получили ${finalSeqno}. Возможно, транзакция не была принята блокчейном.`);
 }
 
 /**

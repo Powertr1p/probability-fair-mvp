@@ -4,12 +4,12 @@ import { HISTORY_FILE } from './constants';
 
 export interface RoundHistory {
     nonce: number;
-    serverSeedBOC: string;       // BOC для проверки в TonViewer
-    nextServerSeedBOC: string;   // BOC следующего seed (commitment)
-    roomSeedBOC: string;         // BOC room seed
+    serverSeedBOC: string;
+    nextServerSeedBOC: string;
+    roomSeedBOC: string;
     result: number;
     timestamp: string;
-    players?: number;            // Количество игроков в комнате
+    players?: number;
 }
 
 export interface SessionHistory {

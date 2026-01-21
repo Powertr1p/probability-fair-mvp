@@ -15,7 +15,6 @@ import {
 import { gameContractAdress, SEEDS_FILE } from './constants';
 import { getCurrentSeqno, waitForSeqnoUpdate } from './seqnoUtils';
 import { initHistory, addRoundToHistory } from './history';
-import path from 'path';
 
 async function generateSession(walletContract: any, keyPair: any, length: number = 50): Promise<void> {
     if (!hasSeeds(SEEDS_FILE)){
@@ -240,7 +239,7 @@ export async function startNewSession(walletContract: any, keyPair: any, length:
 }
 
 async function sendNewSessionToContract(newAnchor: string, walletContract: any, keyPair: any): Promise<void> {
-    const currentSeqno = await getCurrentSeqno(walletContract, 'NewSession');
+    let currentSeqno = await getCurrentSeqno(walletContract, 'NewSession');
     
     const newSessionMsg: NewSessionMsg = {
         $$type: 'NewSession',
@@ -264,9 +263,29 @@ async function sendNewSessionToContract(newAnchor: string, walletContract: any, 
         console.log(`Транзакция для установки нового якоря ${newAnchor} успешно отправлена!`);
         
         await waitForSeqnoUpdate(walletContract, currentSeqno + 1);
-    } catch (error) {
-        console.error(`Ошибка при отправке NewSession:`, error);
-        throw error;
+    } catch (error: any) {
+        if (error?.response?.data?.error?.includes('Duplicate msg_seqno')) {
+            console.log(`⚠️  Обнаружен дубликат seqno ${currentSeqno}, получаем актуальный...`);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            currentSeqno = await walletContract.getSeqno();
+            console.log(`Повторная попытка с seqno ${currentSeqno}`);
+            
+            await walletContract.sendTransfer({
+                seqno: currentSeqno,
+                secretKey: keyPair.secretKey,
+                messages: [internal({
+                    to: gameContractAdress,
+                    value: toNano("0.05"),
+                    body: messageBody
+                })]
+            });
+            
+            console.log(`Транзакция для установки нового якоря ${newAnchor} успешно отправлена!`);
+            await waitForSeqnoUpdate(walletContract, currentSeqno + 1);
+        } else {
+            console.error(`Ошибка при отправке NewSession:`, error);
+            throw error;
+        }
     }
 }
 

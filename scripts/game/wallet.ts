@@ -25,7 +25,7 @@ export async function sendDeposit(amountTON: number): Promise<void> {
     
     const { walletContract, keyPair } = await openWallet();
     const playerAddress = walletContract.address.toString();
-    const currentSeqno = await getCurrentSeqno(walletContract, 'Deposit');
+    let currentSeqno = await getCurrentSeqno(walletContract, 'Deposit');
     const amount = toNano(amountTON.toString());
 
     const message = beginCell()
@@ -34,18 +34,42 @@ export async function sendDeposit(amountTON: number): Promise<void> {
         .storeCoins(amount)
         .endCell();
 
-    await walletContract.sendTransfer({
-        secretKey: keyPair.secretKey,
-        seqno: currentSeqno,
-        messages: [internal({
-            to: Address.parse(gameContractAdress),
-            value: amount + toNano("0.05"), // amount + gas
-            body: message,
-            bounce: false
-        })]
-    });
-    
-    await waitForSeqnoUpdate(walletContract, currentSeqno + 1);
+    try {
+        await walletContract.sendTransfer({
+            secretKey: keyPair.secretKey,
+            seqno: currentSeqno,
+            messages: [internal({
+                to: Address.parse(gameContractAdress),
+                value: amount + toNano("0.05"),
+                body: message,
+                bounce: false
+            })]
+        });
+        
+        await waitForSeqnoUpdate(walletContract, currentSeqno + 1);
+    } catch (error: any) {
+        if (error?.response?.data?.error?.includes('Duplicate msg_seqno')) {
+            console.log(`⚠️  Обнаружен дубликат seqno ${currentSeqno}, получаем актуальный...`);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            currentSeqno = await walletContract.getSeqno();
+            console.log(`Повторная попытка с seqno ${currentSeqno}`);
+            
+            await walletContract.sendTransfer({
+                secretKey: keyPair.secretKey,
+                seqno: currentSeqno,
+                messages: [internal({
+                    to: Address.parse(gameContractAdress),
+                    value: amount + toNano("0.05"),
+                    body: message,
+                    bounce: false
+                })]
+            });
+            
+            await waitForSeqnoUpdate(walletContract, currentSeqno + 1);
+        } else {
+            throw error;
+        }
+    }
     
     const { updatePlayerBalance } = await import('../utils/depositMonitor');
     updatePlayerBalance(playerAddress, amount);
@@ -78,7 +102,7 @@ export async function sendWithdraw(amountTON?: string): Promise<void> {
     console.log(`\n💰 Выводим средства из контракта...`);
     console.log(`   Сумма: ${formatBalance(withdrawAmount)} TON`);
     
-    const currentSeqno = await getCurrentSeqno(walletContract, 'Withdraw');
+    let currentSeqno = await getCurrentSeqno(walletContract, 'Withdraw');
 
     const message = beginCell()
         .storeUint(3, 32) // op: Withdraw
@@ -87,18 +111,42 @@ export async function sendWithdraw(amountTON?: string): Promise<void> {
         .storeAddress(walletContract.address)
         .endCell();
 
-    await walletContract.sendTransfer({
-        secretKey: keyPair.secretKey,
-        seqno: currentSeqno,
-        messages: [internal({
-            to: Address.parse(gameContractAdress),
-            value: toNano("0.01"),
-            body: message,
-            bounce: false
-        })]
-    });
-    
-    await waitForSeqnoUpdate(walletContract, currentSeqno + 1);
+    try {
+        await walletContract.sendTransfer({
+            secretKey: keyPair.secretKey,
+            seqno: currentSeqno,
+            messages: [internal({
+                to: Address.parse(gameContractAdress),
+                value: toNano("0.01"),
+                body: message,
+                bounce: false
+            })]
+        });
+        
+        await waitForSeqnoUpdate(walletContract, currentSeqno + 1);
+    } catch (error: any) {
+        if (error?.response?.data?.error?.includes('Duplicate msg_seqno')) {
+            console.log(`⚠️  Обнаружен дубликат seqno ${currentSeqno}, получаем актуальный...`);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            currentSeqno = await walletContract.getSeqno();
+            console.log(`Повторная попытка с seqno ${currentSeqno}`);
+            
+            await walletContract.sendTransfer({
+                secretKey: keyPair.secretKey,
+                seqno: currentSeqno,
+                messages: [internal({
+                    to: Address.parse(gameContractAdress),
+                    value: toNano("0.01"),
+                    body: message,
+                    bounce: false
+                })]
+            });
+            
+            await waitForSeqnoUpdate(walletContract, currentSeqno + 1);
+        } else {
+            throw error;
+        }
+    }
     
     const success = deductPlayerBalance(playerAddress, withdrawAmount);
     
